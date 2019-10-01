@@ -3,6 +3,7 @@ from numbers import Number
 
 import numpy as np
 import pandas as pd
+from stockstats import StockDataFrame
 
 
 def _as_str(value):
@@ -88,8 +89,12 @@ class _Data:
         # Leave index as Series because pd.Timestamp nicer API to work with
         self.__arrays['__index'] = df.index.copy()
 
+        # keep df in order to compute StockDataFrame
+        self._df = df
+
     def __getitem__(self, item):
-        return getattr(self, item)
+        stock = StockDataFrame.retype(self._df)
+        return _Indicator(np.asarray(stock.get(item))[:self.__i], item)
 
     def __getattr__(self, item):
         try:

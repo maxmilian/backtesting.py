@@ -94,7 +94,10 @@ class _Data:
 
     def __getitem__(self, item):
         stock = StockDataFrame.retype(self._df)
-        return _Indicator(np.asarray(stock.get(item))[:self.__i], item)
+        for column in ["Open", "High", "Low", "Close", "Volume"]:
+            stock[column] = stock[column.lower()]
+        value = _Indicator(np.asarray(stock.get(item))[:self.__i], item)
+        return value
 
     def __getattr__(self, item):
         try:

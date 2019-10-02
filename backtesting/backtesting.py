@@ -125,7 +125,10 @@ class Strategy(metaclass=ABCMeta):
             name = name.format(*map(_as_str, args),
                                **dict(zip(kwargs.keys(), map(_as_str, kwargs.values()))))
 
-        value = func(*args, **kwargs)
+        if isinstance(func, _Indicator):
+            value = func
+        else:
+            value = func(*args, **kwargs)
 
         try:
             if isinstance(value, pd.DataFrame):
@@ -674,7 +677,7 @@ class Backtest:
 
         Keyword arguments are interpreted as strategy parameters.
         """
-        data = _Data(self._data)
+        data = _Data(self._data.copy(False))
         broker = self._broker(data=data)  # type: _Broker
         strategy = self._strategy(broker, data)  # type: Strategy
 

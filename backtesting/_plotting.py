@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 
 from bokeh.colors.named import (
-    lime as BULL_COLOR,
-    tomato as BEAR_COLOR
+    tomato as BULL_COLOR,
+    lime as BEAR_COLOR
 )
 from bokeh.plotting import figure as _figure
 from bokeh.models import (
@@ -163,13 +163,13 @@ return this.labels[index] || "";
     NBSP = '&nbsp;' * 4
     ohlc_extreme_values = df[['High', 'Low']].copy(False)
     ohlc_tooltips = [
-        ('x, y', NBSP.join(('$index',
-                            '$y{0,0.0[0000]}'))),
-        ('OHLC', NBSP.join(('@Open{0,0.0[0000]}',
+        # ('x, y', NBSP.join(('$index',
+        #                     '$y{0,0.0[0000]}'))),
+        ('開高低收', NBSP.join(('@Open{0,0.0[0000]}',
                             '@High{0,0.0[0000]}',
                             '@Low{0,0.0[0000]}',
                             '@Close{0,0.0[0000]}'))),
-        ('Volume', '@Volume{0,0}')]
+        ('成交量', '@Volume{0,0}')]
 
     def new_indicator_figure(**kwargs):
         kwargs.setdefault('plot_height', 90)
@@ -187,7 +187,7 @@ return this.labels[index] || "";
 
         if is_datetime_index:
             formatters = dict(datetime='datetime')
-            tooltips = [("Date", "@datetime{%c}")] + tooltips
+            tooltips = [("日期", "@datetime{%Y-%m-%d}")] + tooltips
         else:
             formatters = {}
             tooltips = [("#", "@index")] + tooltips
@@ -236,7 +236,7 @@ return this.labels[index] || "";
 
         source.add(equity, 'equity')
         fig = new_indicator_figure(
-            y_axis_label="Equity",
+            y_axis_label="淨值",
             **({} if plot_drawdown else dict(plot_height=110)))
 
         # High-watermark drawdown dents
@@ -257,17 +257,17 @@ return this.labels[index] || "";
             tooltip_format = '@equity{$ 0,0}'
             tick_format = '$ 0.0 a'
             legend_format = '${:,.0f}'
-        set_tooltips(fig, [('Equity', tooltip_format)], renderers=[r])
+        set_tooltips(fig, [('淨值', tooltip_format)], renderers=[r])
         fig.yaxis.formatter = NumeralTickFormatter(format=tick_format)
 
         # Peaks
         argmax = equity.idxmax()
         fig.scatter(argmax, equity[argmax],
-                    legend='Peak ({})'.format(
+                    legend='最高 ({})'.format(
                         legend_format.format(equity[argmax] * (100 if relative_equity else 1))),
                     color='cyan', size=8)
         fig.scatter(index[-1], equity.values[-1],
-                    legend='Final ({})'.format(
+                    legend='最後 ({})'.format(
                         legend_format.format(equity.iloc[-1] * (100 if relative_equity else 1))),
                     color='blue', size=8)
 
@@ -275,11 +275,11 @@ return this.labels[index] || "";
             drawdown = trade_data['Drawdown']
             argmax = drawdown.idxmax()
             fig.scatter(argmax, equity[argmax],
-                        legend='Max Drawdown (-{:.1f}%)'.format(100 * drawdown[argmax]),
+                        legend='最大虧損 (-{:.1f}%)'.format(100 * drawdown[argmax]),
                         color='red', size=8)
         fig.line([dd_start, dd_end], equity[dd_start],
                  line_color='red', line_width=2,
-                 legend='Max Dd Dur. ({})'.format(timedelta)
+                 legend='最大虧損持續時間. ({})'.format(timedelta)
                                           .replace(' 00:00:00', '')
                                           .replace('(0 days ', '('))
 
@@ -301,7 +301,7 @@ return this.labels[index] || "";
 
     def _plot_pl_section():
         """Profit/Loss markers section"""
-        fig = new_indicator_figure(y_axis_label="Profit / Loss")
+        fig = new_indicator_figure(y_axis_label="淨利 / 淨損")
         fig.add_layout(Span(location=0, dimension='width', line_color='#666666',
                             line_dash='dashed', line_width=1))
         position = trade_data['Exit Position'].dropna()
@@ -316,19 +316,19 @@ return this.labels[index] || "";
                          marker='triangle', line_color='black', size=MARKER_SIZE)
         r2 = fig.scatter('index', 'returns_short', source=trade_source, fill_color=cmap,
                          marker='inverted_triangle', line_color='black', size=MARKER_SIZE)
-        set_tooltips(fig, [("P/L", "@returns_long{+0.[000]%}")], vline=False, renderers=[r1])
-        set_tooltips(fig, [("P/L", "@returns_short{+0.[000]%}")], vline=False, renderers=[r2])
+        set_tooltips(fig, [("損益", "@returns_long{+0.[000]%}")], vline=False, renderers=[r1])
+        set_tooltips(fig, [("損益", "@returns_short{+0.[000]%}")], vline=False, renderers=[r2])
         fig.yaxis.formatter = NumeralTickFormatter(format="0.[00]%")
         return fig
 
     def _plot_volume_section():
         """Volume section"""
-        fig = new_indicator_figure(y_axis_label="Volume")
+        fig = new_indicator_figure(y_axis_label="成交量")
         fig.xaxis.formatter = fig_ohlc.xaxis[0].formatter
         fig.xaxis.visible = True
         fig_ohlc.xaxis.visible = False  # Show only Volume's xaxis
         r = fig.vbar('index', bar_width, 'Volume', source=source, color=inc_cmap)
-        set_tooltips(fig, [('Volume', '@Volume{0.00 a}')], renderers=[r])
+        set_tooltips(fig, [('成交量', '@Volume{0.00 a}')], renderers=[r])
         fig.yaxis.formatter = NumeralTickFormatter(format="0 a")
         return fig
 
@@ -402,7 +402,7 @@ return this.labels[index] || "";
                          'position_lines_ys')
         fig_ohlc.multi_line(xs='position_lines_xs', ys='position_lines_ys',
                             source=trade_source, line_color=trades_cmap,
-                            legend='Trades',
+                            legend='交易',
                             line_width=8, line_alpha=1, line_dash='dotted')
 
     def _plot_indicators():

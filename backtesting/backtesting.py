@@ -29,7 +29,7 @@ except ImportError:
         return seq
 
 from ._plotting import plot
-from ._util import _as_str, _Indicator, _Data, _data_period
+from ._util import _as_str, _Array, _Indicator, _Data, _data_period
 
 
 __pdoc__ = {
@@ -127,6 +127,12 @@ class Strategy(metaclass=ABCMeta):
 
         if isinstance(func, _Indicator):
             value = func
+        elif isinstance(func, _Array):
+            value = _Indicator(func)
+        elif isinstance(func, np.ndarray):
+            value = _Indicator(_Array(func))
+        elif isinstance(func, pd.Series):
+            value = _Indicator(_Array(func.to_numpy(), name=name))
         else:
             value = func(*args, **kwargs)
 

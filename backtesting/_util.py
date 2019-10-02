@@ -4,6 +4,7 @@ from numbers import Number
 import numpy as np
 import pandas as pd
 from stockstats import StockDataFrame
+from talib import abstract
 
 
 def _as_str(value):
@@ -90,6 +91,8 @@ class _Data:
         self.__arrays['__index'] = df.index.copy()
 
         # keep df in order to compute StockDataFrame
+        for column in ["Open", "High", "Low", "Close", "Volume"]:
+            df[column.lower()] = df[column]
         self._df = df
 
     def __getitem__(self, item):
@@ -103,7 +106,13 @@ class _Data:
         try:
             return self.__get_array(item)
         except KeyError:
-            raise KeyError("Column '{}' not in data".format(item)) from None
+            # use ta-lib
+            output = abstract.Function(item.lower())(self._df)
+            if output.ndim > 1:
+                output = output[item.lower()]
+            value = _Indicator(np.asarray(output)[:self.__i], item)
+            return value
+            # raise KeyError("Column '{}' not in data".format(item)) from None
 
     def _set_length(self, i):
         self.__i = i

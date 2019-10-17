@@ -1007,7 +1007,7 @@ class Backtest:
                 return re.sub(r'[^a-zA-Z0-9,_-]', '_', filename.replace('=', '-'))
             return filename
 
-        plot(
+        return plot(
             results=results,
             df=self._data,
             indicators=results._strategy._indicators,

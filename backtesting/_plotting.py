@@ -1,5 +1,6 @@
 import os
 import warnings
+import json
 from itertools import cycle, combinations
 from functools import partial
 
@@ -28,6 +29,7 @@ from bokeh.io.state import curstate
 from bokeh.layouts import gridplot
 from bokeh.palettes import Category10
 from bokeh.transform import factor_cmap
+from bokeh.embed import json_item
 
 from backtesting._util import _data_period, _as_list
 
@@ -562,8 +564,8 @@ return this.labels[index] || "";
         merge_tools=True,
         **kwargs
     )
-    show(fig, browser=None if open_browser else 'none')
-    return fig
+    # show(fig, browser=None if open_browser else 'none')
+    return json.dumps(json_item(fig, "myplot"))
 
 
 def plot_heatmaps(heatmap: pd.Series, agg: str, ncols: int,
